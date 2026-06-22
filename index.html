@@ -3,32 +3,33 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>🕵️ Таємний агент: Шкільний привид</title>
+    <title>🕵️ Таємний агент · Шкільний привид</title>
 
-    <!-- Google Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
-
-    <!-- A-Frame + MindAR -->
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js">
+    <!-- Import Map for THREE.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.158.0/build/three.module.js"
+            }
+        }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js">
+
+    <!-- MindAR (regular script, provides global MindAR) -->
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js">
     </script>
 
     <style>
-        /* ===== RESET & BASE ===== */
+        /* ===== RESET ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         html,
         body {
             height: 100%;
             overflow: hidden;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background: #0b0e1a;
             color: #fff;
             -webkit-tap-highlight-color: transparent;
@@ -39,17 +40,12 @@
         /* ===== SCREENS ===== */
         .screen {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             display: none;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
             z-index: 10;
-            transition: opacity 0.4s ease;
             opacity: 0;
+            transition: opacity 0.35s ease;
             overflow: hidden;
         }
         .screen.active {
@@ -59,56 +55,51 @@
 
         /* ===== DASHBOARD ===== */
         #dashboard {
-            background: radial-gradient(ellipse at 50% 30%, #141b33, #070a12);
-            padding: 20px 16px 30px;
-            justify-content: flex-start;
+            background: radial-gradient(ellipse at 50% 20%, #141b33, #070a12);
+            padding: 18px 16px 24px;
             overflow-y: auto;
+            align-items: center;
         }
-
         .dash-header {
             text-align: center;
-            padding: 10px 0 6px;
             width: 100%;
+            max-width: 420px;
             flex-shrink: 0;
         }
         .dash-header .badge {
             display: inline-block;
-            background: rgba(212, 175, 55, 0.18);
-            border: 1px solid rgba(212, 175, 55, 0.35);
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.25);
             border-radius: 40px;
-            padding: 4px 18px;
+            padding: 4px 16px;
             font-size: 11px;
             font-weight: 700;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             color: #d4af37;
             text-transform: uppercase;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
         .dash-header h1 {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 900;
             background: linear-gradient(135deg, #d4af37, #f5e08a);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 40px rgba(212, 175, 55, 0.2);
             line-height: 1.2;
         }
         .dash-header .sub {
-            font-size: 14px;
+            font-size: 13px;
             color: #8896b8;
-            font-weight: 400;
             margin-top: 2px;
-            letter-spacing: 0.3px;
         }
 
-        /* progress */
         .progress-wrap {
             width: 100%;
             max-width: 380px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 30px;
-            height: 8px;
-            margin: 12px auto 16px;
+            height: 6px;
+            margin: 12px auto 14px;
             overflow: hidden;
             flex-shrink: 0;
         }
@@ -120,29 +111,27 @@
             transition: width 0.5s ease;
         }
 
-        /* grid */
         .grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 10px;
             width: 100%;
             max-width: 420px;
             flex-shrink: 0;
-            margin: 4px 0 12px;
+            margin: 2px 0 12px;
         }
-
         .loc-btn {
             background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 16px 6px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 18px;
+            padding: 14px 4px 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.25s ease;
-            min-height: 110px;
+            min-height: 100px;
             position: relative;
             touch-action: manipulation;
         }
@@ -150,12 +139,12 @@
             transform: scale(0.94);
         }
         .loc-btn .icon {
-            font-size: 34px;
-            margin-bottom: 4px;
+            font-size: 30px;
             line-height: 1;
+            margin-bottom: 2px;
         }
         .loc-btn .name {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             color: #c8d0e6;
             text-align: center;
@@ -168,28 +157,27 @@
             background: #d4af37;
             color: #0b0e1a;
             font-weight: 900;
-            font-size: 18px;
-            width: 32px;
-            height: 32px;
+            font-size: 16px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             display: none;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
             border: 2px solid #0b0e1a;
         }
         .loc-btn .letter-badge.show {
             display: flex;
         }
         .loc-btn.done {
-            border-color: rgba(212, 175, 55, 0.3);
-            background: rgba(212, 175, 55, 0.08);
+            border-color: rgba(212, 175, 55, 0.25);
+            background: rgba(212, 175, 55, 0.07);
         }
         .loc-btn.done .name {
             color: #d4af37;
         }
 
-        /* bottom */
         .dash-bottom {
             width: 100%;
             max-width: 420px;
@@ -197,44 +185,50 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
-            padding-top: 6px;
+            gap: 8px;
+            padding-top: 4px;
         }
-
+        .collected-word {
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: 6px;
+            color: #d4af37;
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.12);
+            min-height: 38px;
+            text-align: center;
+        }
         .decoder-btn {
             background: linear-gradient(135deg, #d4af37, #b8962e);
             border: none;
             border-radius: 60px;
-            padding: 14px 28px;
+            padding: 13px 28px;
             font-family: 'Inter', sans-serif;
             font-weight: 800;
-            font-size: 18px;
+            font-size: 17px;
             color: #0b0e1a;
             cursor: pointer;
             width: 100%;
-            max-width: 280px;
+            max-width: 260px;
             transition: all 0.25s ease;
-            box-shadow: 0 4px 24px rgba(212, 175, 55, 0.25);
+            box-shadow: 0 4px 24px rgba(212, 175, 55, 0.2);
             touch-action: manipulation;
-            letter-spacing: 0.5px;
         }
         .decoder-btn:active {
             transform: scale(0.95);
         }
         .decoder-btn:disabled {
-            opacity: 0.4;
+            opacity: 0.35;
             transform: none;
             box-shadow: none;
         }
-
         .reset-btn {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 60px;
-            padding: 10px 20px;
+            padding: 9px 18px;
             font-family: 'Inter', sans-serif;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12px;
             color: #8896b8;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -244,31 +238,30 @@
             transform: scale(0.94);
         }
 
-        .collected-word {
-            font-size: 28px;
-            font-weight: 900;
-            letter-spacing: 8px;
-            color: #d4af37;
-            text-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
-            min-height: 42px;
-            text-align: center;
-        }
-
         /* ===== AR VIEW ===== */
         #arView {
             background: #000;
             padding: 0;
-            justify-content: flex-start;
         }
-
-        #arView a-scene {
+        #arView canvas#arCanvas {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            z-index: 2;
+            display: block;
+            pointer-events: none;
+        }
+        #arView video#arVideo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
             z-index: 1;
-            background: transparent;
+            display: none;
         }
 
         .ar-overlay {
@@ -280,24 +273,25 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 16px 18px 22px;
+            padding: 14px 16px 18px;
         }
-
         .ar-top {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             pointer-events: auto;
+            gap: 8px;
+            flex-wrap: wrap;
         }
         .ar-back {
-            background: rgba(0, 0, 0, 0.65);
+            background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 40px;
-            padding: 8px 16px;
+            padding: 7px 16px;
             font-family: 'Inter', sans-serif;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
             color: #fff;
             cursor: pointer;
             touch-action: manipulation;
@@ -307,44 +301,67 @@
         .ar-back:active {
             transform: scale(0.92);
         }
+        .ar-pause-btn {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 20px;
+            color: #fff;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.2s ease;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ar-pause-btn:active {
+            transform: scale(0.92);
+        }
+        .ar-pause-btn.paused {
+            background: rgba(212, 175, 55, 0.3);
+            border-color: #d4af37;
+        }
         .ar-location-name {
             background: rgba(0, 0, 0, 0.55);
             backdrop-filter: blur(8px);
-            padding: 6px 16px;
+            padding: 5px 14px;
             border-radius: 40px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             color: #d4af37;
-            border: 1px solid rgba(212, 175, 55, 0.2);
+            border: 1px solid rgba(212, 175, 55, 0.15);
             pointer-events: none;
         }
-
         .ar-hint {
             text-align: center;
             pointer-events: none;
             margin-top: auto;
-            margin-bottom: 30px;
+            margin-bottom: 28px;
         }
         .ar-hint .label {
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(8px);
-            padding: 12px 24px;
+            padding: 10px 22px;
             border-radius: 60px;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             color: #c8d0e6;
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             display: inline-block;
         }
         .ar-hint .label .emoji {
             margin-right: 8px;
         }
 
-        /* AR Quiz Overlay */
+        /* AR Quiz */
         .ar-quiz {
             position: absolute;
             z-index: 25;
-            bottom: 30px;
+            bottom: 24px;
             left: 50%;
             transform: translateX(-50%);
             width: 92%;
@@ -352,43 +369,43 @@
             pointer-events: auto;
             display: none;
             flex-direction: column;
-            gap: 8px;
-            background: rgba(11, 14, 26, 0.92);
+            gap: 6px;
+            background: rgba(11, 14, 26, 0.94);
             backdrop-filter: blur(16px);
-            border-radius: 28px;
-            padding: 20px 18px 18px;
-            border: 1px solid rgba(212, 175, 55, 0.15);
-            box-shadow: 0 8px 48px rgba(0, 0, 0, 0.7);
+            border-radius: 24px;
+            padding: 18px 16px 16px;
+            border: 1px solid rgba(212, 175, 55, 0.12);
+            box-shadow: 0 8px 48px rgba(0, 0, 0, 0.8);
         }
         .ar-quiz.show {
             display: flex;
         }
+        .ar-quiz .q-ghost {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 0px;
+        }
         .ar-quiz .q-text {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: #e8edf5;
             text-align: center;
             line-height: 1.4;
             margin-bottom: 4px;
         }
-        .ar-quiz .q-ghost {
-            text-align: center;
-            font-size: 28px;
-            margin-bottom: 2px;
-        }
         .ar-quiz .options {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 5px;
         }
         .ar-quiz .opt {
             background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 14px;
+            padding: 10px 14px;
             font-family: 'Inter', sans-serif;
             font-weight: 600;
-            font-size: 15px;
+            font-size: 14px;
             color: #c8d0e6;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -413,24 +430,25 @@
             opacity: 0.5;
         }
 
+        /* Letter Reveal */
         .ar-letter-reveal {
             position: absolute;
             z-index: 30;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 80px;
+            font-size: 72px;
             font-weight: 900;
             color: #d4af37;
-            text-shadow: 0 0 60px rgba(212, 175, 55, 0.5), 0 0 120px rgba(212, 175, 55, 0.2);
+            text-shadow: 0 0 60px rgba(212, 175, 55, 0.4), 0 0 120px rgba(212, 175, 55, 0.15);
             pointer-events: none;
             display: none;
             animation: letterPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.55);
             backdrop-filter: blur(12px);
-            padding: 20px 40px;
-            border-radius: 40px;
-            border: 2px solid rgba(212, 175, 55, 0.3);
+            padding: 16px 36px;
+            border-radius: 36px;
+            border: 2px solid rgba(212, 175, 55, 0.2);
         }
         .ar-letter-reveal.show {
             display: flex;
@@ -451,47 +469,46 @@
             background: radial-gradient(ellipse at 50% 30%, #141b33, #070a12);
             padding: 24px 20px;
             justify-content: center;
+            align-items: center;
         }
-
         .decoder-box {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 32px;
-            padding: 28px 22px 32px;
+            padding: 26px 20px 30px;
             width: 100%;
             max-width: 400px;
             text-align: center;
             backdrop-filter: blur(10px);
         }
         .decoder-box h2 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
             color: #d4af37;
             margin-bottom: 4px;
         }
         .decoder-box .sub {
-            font-size: 14px;
+            font-size: 13px;
             color: #8896b8;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
-
         .decoder-input-row {
             display: flex;
             gap: 10px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
         .decoder-input-row input {
             flex: 1;
             background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 14px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 12px 14px;
             font-family: 'Inter', sans-serif;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             color: #fff;
             text-align: center;
-            letter-spacing: 6px;
+            letter-spacing: 4px;
             outline: none;
             transition: border 0.2s;
             text-transform: uppercase;
@@ -502,13 +519,13 @@
         .decoder-input-row input::placeholder {
             color: #445;
             letter-spacing: 2px;
-            font-size: 14px;
+            font-size: 13px;
         }
         .decoder-input-row button {
             background: linear-gradient(135deg, #d4af37, #b8962e);
             border: none;
-            border-radius: 16px;
-            padding: 0 20px;
+            border-radius: 14px;
+            padding: 0 18px;
             font-family: 'Inter', sans-serif;
             font-weight: 800;
             font-size: 16px;
@@ -521,19 +538,18 @@
         .decoder-input-row button:active {
             transform: scale(0.94);
         }
-
         .decoder-result {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 700;
-            min-height: 50px;
-            padding: 12px;
-            border-radius: 16px;
+            min-height: 46px;
+            padding: 10px;
+            border-radius: 14px;
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.04);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
         }
         .decoder-result.success {
@@ -547,27 +563,89 @@
             background: rgba(231, 76, 60, 0.06);
         }
         .decoder-result .big {
-            font-size: 36px;
+            font-size: 34px;
         }
-
         .decoder-back {
-            margin-top: 16px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-top: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 60px;
-            padding: 12px 28px;
+            padding: 10px 24px;
             font-family: 'Inter', sans-serif;
             font-weight: 600;
-            font-size: 15px;
+            font-size: 14px;
             color: #8896b8;
             cursor: pointer;
             transition: all 0.2s ease;
             touch-action: manipulation;
             width: 100%;
-            max-width: 200px;
+            max-width: 180px;
         }
         .decoder-back:active {
             transform: scale(0.94);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .dash-header h1 {
+                font-size: 21px;
+            }
+            .grid {
+                gap: 7px;
+            }
+            .loc-btn {
+                min-height: 84px;
+                padding: 10px 4px 8px;
+            }
+            .loc-btn .icon {
+                font-size: 26px;
+            }
+            .loc-btn .name {
+                font-size: 11px;
+            }
+            .ar-quiz .q-text {
+                font-size: 14px;
+            }
+            .ar-quiz .opt {
+                font-size: 13px;
+                padding: 8px 12px;
+            }
+            .ar-letter-reveal {
+                font-size: 54px;
+                padding: 12px 24px;
+            }
+            .collected-word {
+                font-size: 22px;
+                letter-spacing: 4px;
+            }
+            .decoder-input-row input {
+                font-size: 17px;
+                padding: 10px 10px;
+                letter-spacing: 3px;
+            }
+        }
+        @media (max-width: 380px) {
+            .grid {
+                gap: 5px;
+            }
+            .loc-btn {
+                min-height: 72px;
+                padding: 8px 2px 6px;
+                border-radius: 14px;
+            }
+            .loc-btn .icon {
+                font-size: 22px;
+            }
+            .loc-btn .name {
+                font-size: 10px;
+            }
+            .dash-header h1 {
+                font-size: 18px;
+            }
+            .ar-letter-reveal {
+                font-size: 44px;
+                padding: 10px 18px;
+            }
         }
 
         /* ===== SCROLLBAR ===== */
@@ -582,79 +660,17 @@
             border-radius: 10px;
         }
 
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 480px) {
-            .dash-header h1 {
-                font-size: 22px;
-            }
-            .grid {
-                gap: 8px;
-            }
-            .loc-btn {
-                min-height: 90px;
-                padding: 12px 4px 10px;
-            }
-            .loc-btn .icon {
-                font-size: 28px;
-            }
-            .loc-btn .name {
-                font-size: 11px;
-            }
-            .ar-quiz .q-text {
-                font-size: 14px;
-            }
-            .ar-quiz .opt {
-                font-size: 13px;
-                padding: 10px 14px;
-            }
-            .decoder-input-row input {
-                font-size: 18px;
-                padding: 10px 12px;
-            }
-            .ar-letter-reveal {
-                font-size: 56px;
-                padding: 14px 28px;
-            }
-            .collected-word {
-                font-size: 22px;
-                letter-spacing: 6px;
-            }
-        }
-
-        @media (max-width: 380px) {
-            .grid {
-                gap: 6px;
-            }
-            .loc-btn {
-                min-height: 76px;
-                padding: 8px 2px 8px;
-                border-radius: 14px;
-            }
-            .loc-btn .icon {
-                font-size: 22px;
-            }
-            .loc-btn .name {
-                font-size: 10px;
-            }
-            .dash-header h1 {
-                font-size: 18px;
-            }
-        }
-
         /* ===== UTILITY ===== */
         .hidden {
             display: none !important;
-        }
-        .fade-transition {
-            transition: opacity 0.3s ease;
         }
     </style>
 </head>
 <body>
 
-    <!-- ============================================================ -->
-    <!-- SCREEN: DASHBOARD                                            -->
-    <!-- ============================================================ -->
+    <!-- ================================================================ -->
+    <!-- SCREEN: DASHBOARD                                                -->
+    <!-- ================================================================ -->
     <div id="dashboard" class="screen active">
         <div class="dash-header">
             <div class="badge">🕵️ Місія</div>
@@ -666,9 +682,7 @@
             <div class="progress-fill" id="progressFill"></div>
         </div>
 
-        <div class="grid" id="locationGrid">
-            <!-- generated by JS -->
-        </div>
+        <div class="grid" id="locationGrid"></div>
 
         <div class="dash-bottom">
             <div class="collected-word" id="collectedWord">_ _ _ _ _ _</div>
@@ -677,91 +691,60 @@
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- SCREEN: AR VIEW                                              -->
-    <!-- ============================================================ -->
+    <!-- ================================================================ -->
+    <!-- SCREEN: AR VIEW                                                  -->
+    <!-- ================================================================ -->
     <div id="arView" class="screen">
-        <!-- A-Frame Scene -->
-        <a-scene
-        mindar-image="imageTargetSrc: ./marker.mind; autoStart: true; uiLoading: no; uiError: no; maxTrack: 1;"
-        embedded
-        color-space="sRGB"
-        vr-mode-ui="enabled: false"
-        device-orientation-permission-ui="enabled: false"
-        id="arScene"
-        style="background: transparent;"
-        >
-        <a-assets>
-            <!-- videos will be set by JS -->
-            <video id="arVideo" muted playsinline webkit-playsinline preload="auto" loop></video>
-        </a-assets>
+        <video id="arVideo" playsinline muted preload="auto" style="display:none;"></video>
+        <canvas id="arCanvas"></canvas>
 
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-        <a-entity mindar-image-target="targetIndex: 0">
-            <a-video
-            src="#arVideo"
-            width="1.7"
-            height="3.0"
-            position="0 0 0"
-            visible="false"
-            id="videoEntity"
-            >
-        </a-video>
-    </a-entity>
-</a-scene>
-
-<!-- Overlay -->
-<div class="ar-overlay">
-    <div class="ar-top">
-        <button class="ar-back" id="arBackBtn">← Назад</button>
-        <span class="ar-location-name" id="arLocationName">📍 Локація</span>
-    </div>
-    <div class="ar-hint" id="arHint">
-        <span class="label"><span class="emoji">📸</span> Наведи камеру на маркер</span>
-    </div>
-</div>
-
-<!-- Quiz -->
-<div class="ar-quiz" id="arQuiz">
-    <div class="q-ghost" id="qGhost">👻</div>
-    <div class="q-text" id="qText">Питання?</div>
-    <div class="options" id="qOptions"></div>
-</div>
-
-<!-- Letter Reveal -->
-<div class="ar-letter-reveal" id="arLetterReveal">
-    <span id="revealLetter">З</span>
-</div>
-</div>
-
-<!-- ============================================================ -->
-<!-- SCREEN: DECODER                                              -->
-<!-- ============================================================ -->
-<div id="decoder" class="screen">
-    <div class="decoder-box">
-        <h2>🔐 Дешифратор</h2>
-        <div class="sub">Введи зібрані літери, щоб розкрити слово</div>
-
-        <div class="decoder-input-row">
-            <input type="text" id="decoderInput" placeholder="З Н А Н Н Я" maxlength="6" autocomplete="off" />
-            <button id="decoderCheckBtn">✅</button>
+        <div class="ar-overlay">
+            <div class="ar-top">
+                <button class="ar-back" id="arBackBtn">← Назад</button>
+                <span class="ar-location-name" id="arLocationName">📍 Локація</span>
+                <button class="ar-pause-btn" id="arPauseBtn">⏸</button>
+            </div>
+            <div class="ar-hint" id="arHint">
+                <span class="label"><span class="emoji">📸</span> Наведи камеру на маркер</span>
+            </div>
         </div>
 
-        <div class="decoder-result" id="decoderResult">
-            <span style="color:#8896b8;">Введи 6 літер</span>
+        <!-- Quiz -->
+        <div class="ar-quiz" id="arQuiz">
+            <div class="q-ghost" id="qGhost">👻</div>
+            <div class="q-text" id="qText">Питання?</div>
+            <div class="options" id="qOptions"></div>
         </div>
 
-        <button class="decoder-back" id="decoderBackBtn">← На головну</button>
+        <!-- Letter Reveal -->
+        <div class="ar-letter-reveal" id="arLetterReveal">
+            <span id="revealLetter">З</span>
+        </div>
     </div>
-</div>
 
-<!-- ============================================================ -->
-<!-- JAVASCRIPT                                                    -->
-<!-- ============================================================ -->
-<script>
-    (function() {
-        'use strict';
+    <!-- ================================================================ -->
+    <!-- SCREEN: DECODER                                                  -->
+    <!-- ================================================================ -->
+    <div id="decoder" class="screen">
+        <div class="decoder-box">
+            <h2>🔐 Дешифратор</h2>
+            <div class="sub">Введи зібрані літери, щоб розкрити слово</div>
+            <div class="decoder-input-row">
+                <input type="text" id="decoderInput" placeholder="З Н А Н Н Я" maxlength="6" autocomplete="off" />
+                <button id="decoderCheckBtn">✅</button>
+            </div>
+            <div class="decoder-result" id="decoderResult">
+                <span style="color:#8896b8;">Введи 6 літер</span>
+            </div>
+            <button class="decoder-back" id="decoderBackBtn">← На головну</button>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- JAVASCRIPT                                                       -->
+    <!-- ================================================================ -->
+    <script type="module">
+        import * as THREE from 'three';
 
         // =============================================================
         // DATA
@@ -771,110 +754,80 @@
             name: 'Біологія',
             icon: '🌿',
             letter: 'З',
-            video: './video1.mp4',
-            marker: './marker1.mind',
+            video: './01_biologiya.mp4',
             ghost: '👻 Зелений Дух',
             question: 'Що потрібно рослині для фотосинтезу?',
-            options: [
-                'Тільки вода',
-                'Світло, вода і вуглекислий газ',
-                'Цукор і сіль'
-            ],
+            options: ['Тільки вода', 'Світло, вода і вуглекислий газ', 'Цукор і сіль'],
             correct: 1,
-            hint: 'Зелене світло'
         }, {
             id: 1,
             name: 'Географія',
             icon: '🌍',
             letter: 'Н',
-            video: './video2.mp4',
-            marker: './marker2.mind',
+            video: './02_geografiya.mp4',
             ghost: '👻 Мандрівник',
             question: 'Який найглибший океан на Землі?',
-            options: [
-                'Атлантичний',
-                'Індійський',
-                'Тихий'
-            ],
+            options: ['Атлантичний', 'Індійський', 'Тихий'],
             correct: 2,
-            hint: 'Нова карта світу'
         }, {
             id: 2,
             name: 'Початкова школа',
             icon: '📚',
             letter: 'А',
-            video: './video3.mp4',
-            marker: './marker3.mind',
+            video: './03_pochatkova.mp4',
             ghost: '👻 Дух Абетки',
             question: 'Скільки літер в українській абетці?',
-            options: [
-                '33',
-                '26',
-                '36'
-            ],
+            options: ['33', '26', '36'],
             correct: 0,
-            hint: 'Абетка — початок усього'
         }, {
             id: 3,
             name: 'Їдальня',
             icon: '🍽️',
             letter: 'Н',
-            video: './video4.mp4',
-            marker: './marker4.mind',
+            video: './04_yidalnya.mp4',
             ghost: '👻 Кухар-Привид',
             question: 'Що з цього найкорисніший сніданок для школяра?',
-            options: [
-                'Чіпси з колою',
-                'Каша, фрукти і чай',
-                'Тільки цукерки'
-            ],
+            options: ['Чіпси з колою', 'Каша, фрукти і чай', 'Тільки цукерки'],
             correct: 1,
-            hint: 'На здоров\'я!'
         }, {
             id: 4,
             name: 'Дзеркало',
             icon: '🪞',
             letter: 'Н',
-            video: './video5.mp4',
-            marker: './marker5.mind',
+            video: './05_dzerkalo.mp4',
             ghost: '👻 Двійник',
             question: 'Що відображає дзеркало?',
             options: [
-                'Твоє відображення, але ліворуч і праворуч поміняні місцями',
+                'Відображення (ліворуч/праворуч)',
                 'Твій характер',
                 'Майбутнє'
             ],
             correct: 0,
-            hint: 'Віддзеркалення — подвоєння'
         }, {
             id: 5,
             name: 'Навчальний розклад',
             icon: '📅',
             letter: 'Я',
-            video: './video6.mp4',
-            marker: './marker6.mind',
+            video: './06_rozklad.mp4',
             ghost: '👻 Хронос',
             question: 'Скільки триває один урок у школі?',
-            options: [
-                '30 хвилин',
-                '45 хвилин',
-                '60 хвилин'
-            ],
+            options: ['30 хвилин', '45 хвилин', '60 хвилин'],
             correct: 1,
-            hint: 'Я — учень 5 класу!'
         }];
 
         const TARGET_WORD = 'ЗНАННЯ';
+        const STORAGE_KEY = 'school_ghost_agent';
 
         // =============================================================
         // STATE
         // =============================================================
-        let state = {
-            completed: new Array(6).fill(false), // true = letter collected
+        const state = {
+            completed: new Array(6).fill(false),
             letters: new Array(6).fill(''),
             currentLocation: null, // index or null
             quizLocked: false,
-            sceneReady: false,
+            arPaused: false,
+            markerFound: false,
         };
 
         // =============================================================
@@ -889,8 +842,8 @@
         const collectedWord = $('collectedWord');
         const decoderBtn = $('decoderBtn');
         const resetBtn = $('resetBtn');
-
         const arBackBtn = $('arBackBtn');
+        const arPauseBtn = $('arPauseBtn');
         const arLocationName = $('arLocationName');
         const arHint = $('arHint');
         const arQuiz = $('arQuiz');
@@ -899,23 +852,35 @@
         const qOptions = $('qOptions');
         const arLetterReveal = $('arLetterReveal');
         const revealLetter = $('revealLetter');
-
-        const videoEl = document.getElementById('arVideo');
-        const videoEntity = document.getElementById('videoEntity');
-        const arScene = document.getElementById('arScene');
-
+        const videoEl = $('arVideo');
+        const canvasEl = $('arCanvas');
         const decoderInput = $('decoderInput');
         const decoderCheckBtn = $('decoderCheckBtn');
         const decoderResult = $('decoderResult');
         const decoderBackBtn = $('decoderBackBtn');
 
         // =============================================================
-        // SCREEN MANAGEMENT
+        // LOCAL STORAGE
         // =============================================================
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            const target = document.getElementById(screenId);
-            if (target) target.classList.add('active');
+        function saveGameState() {
+            try {
+                const data = { completed: state.completed, letters: state.letters, timestamp: Date.now() };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            } catch (_) {}
+        }
+
+        function loadGameState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return false;
+                const data = JSON.parse(raw);
+                if (data.completed && data.completed.length === LOCATIONS.length) {
+                    state.completed = data.completed;
+                    state.letters = data.letters;
+                    return true;
+                }
+            } catch (_) {}
+            return false;
         }
 
         // =============================================================
@@ -926,20 +891,18 @@
             const pct = Math.round((completedCount / LOCATIONS.length) * 100);
             progressFill.style.width = pct + '%';
 
-            // collected word
             let word = '';
             for (let i = 0; i < LOCATIONS.length; i++) {
                 word += state.letters[i] || '_';
             }
             collectedWord.textContent = word.split('').join(' ');
 
-            // buttons
             grid.innerHTML = '';
             LOCATIONS.forEach((loc, idx) => {
                 const done = state.completed[idx];
                 const btn = document.createElement('div');
                 btn.className = 'loc-btn' + (done ? ' done' : '');
-                btn.setAttribute('data-index', idx);
+                btn.dataset.index = idx;
 
                 const icon = document.createElement('div');
                 icon.className = 'icon';
@@ -957,165 +920,424 @@
                 btn.appendChild(name);
                 btn.appendChild(badge);
 
-                btn.addEventListener('click', () => {
-                    if (!state.completed[idx]) {
-                        openLocation(idx);
-                    } else {
-                        // already done — maybe show a little feedback?
-                        // just re-open? or do nothing? we'll re-open.
-                        openLocation(idx);
-                    }
-                });
-
+                btn.addEventListener('click', () => openLocation(idx));
                 grid.appendChild(btn);
             });
 
             decoderBtn.disabled = (completedCount < LOCATIONS.length);
+            saveGameState();
         }
 
         // =============================================================
-        // AR VIEW
+        // SCREEN MANAGEMENT
         // =============================================================
-        let arInitialized = false;
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(screenId);
+            if (target) target.classList.add('active');
+        }
 
-        function openLocation(index) {
+        function goToDashboard() {
+            // Pause AR if running
+            if (arRunning) pauseAR(true);
+            showScreen('dashboard');
+            renderDashboard();
+            // Hide quiz and letter
+            arQuiz.classList.remove('show');
+            arQuiz.style.display = 'none';
+            arLetterReveal.classList.remove('show');
+            arLetterReveal.style.display = 'none';
+            state.quizLocked = false;
+            state.currentLocation = null;
+            // Hide video plane
+            if (videoPlane) videoPlane.visible = false;
+            if (hologramGroup) hologramGroup.visible = false;
+        }
+
+        // =============================================================
+        // AR — THREE.JS SETUP
+        // =============================================================
+        let scene, camera, renderer;
+        let videoPlane, hologramGroup;
+        let videoTexture;
+        let shaderMaterial;
+        let arRunning = false;
+        let arController = null;
+        let animationId = null;
+        let videoLoaded = false;
+
+        // Chroma-key shader from the user's code
+        const vertexShader = `
+            varying vec2 vUv;
+            void main(){
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const fragmentShader = `
+            uniform sampler2D uTex;
+            uniform float uTime;
+            uniform float uPlaying;
+            varying vec2 vUv;
+
+            vec3 rgb2hsv(vec3 c){
+                vec4 K = vec4(0.0, -1.0/3.0, 2.0/3.0, -1.0);
+                vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+                vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+                float d = q.x - min(q.w, q.y);
+                float e = 1e-10;
+                return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+            }
+
+            void main(){
+                if(uPlaying < 0.5){ discard; }
+
+                vec4 col = texture2D(uTex, vUv);
+                vec3 hsv = rgb2hsv(col.rgb);
+                float hDeg = hsv.x * 360.0;
+
+                bool isChroma = (hDeg > 80.0 && hDeg < 170.0)
+                              && hsv.y > 0.25
+                              && hsv.z > 0.10;
+
+                if(isChroma) discard;
+
+                float edgeMask = 1.0;
+                if(hDeg > 75.0 && hDeg < 175.0 && hsv.y > 0.15 && hsv.z > 0.08){
+                    float blend = smoothstep(0.15, 0.28, hsv.y);
+                    edgeMask = 1.0 - blend;
+                    if(edgeMask < 0.05) discard;
+                }
+
+                float noise = fract(sin(vUv.x*800.0 + vUv.y*600.0 + uTime*10.0) * 43758.5453);
+                vec3 fc = mix(col.rgb, vec3(0.15, 0.95, 0.3), 0.32);
+                fc += noise * 0.15;
+                fc += sin(vUv.y*600.0 + uTime*15.0) * 0.10;
+
+                gl_FragColor = vec4(fc, edgeMask * 0.92);
+            }
+        `;
+
+        function initARScene() {
+            const container = arView;
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 0, 3.2);
+
+            // Scene
+            scene = new THREE.Scene();
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({
+                canvas: canvasEl,
+                alpha: true,
+                antialias: false,
+            });
+            renderer.setClearColor(0x000000, 0);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // Video texture
+            videoTexture = new THREE.VideoTexture(videoEl);
+            videoTexture.minFilter = THREE.LinearFilter;
+            videoTexture.magFilter = THREE.LinearFilter;
+
+            // Shader material
+            shaderMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    uTex: { value: videoTexture },
+                    uTime: { value: 0 },
+                    uPlaying: { value: 0 },
+                },
+                vertexShader: vertexShader,
+                fragmentShader: fragmentShader,
+                transparent: true,
+                side: THREE.DoubleSide,
+                depthWrite: false,
+            });
+
+            // Video plane
+            const geo = new THREE.PlaneGeometry(1.1, 0.85);
+            videoPlane = new THREE.Mesh(geo, shaderMaterial);
+            videoPlane.position.set(0, 0.0, 0);
+            videoPlane.visible = false;
+            scene.add(videoPlane);
+
+            // Hologram group (for particles)
+            hologramGroup = new THREE.Group();
+            scene.add(hologramGroup);
+
+            // Particles
+            for (let i = 0; i < 20; i++) {
+                const p = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.006, 6, 6),
+                    new THREE.MeshStandardMaterial({ color: 0x44ff44, emissive: 0x88ff88, emissiveIntensity: 0.5 })
+                );
+                p.userData = { angle: (i / 20) * Math.PI * 2, radius: 0.55, speed: 0.3 + Math.random() * 0.5 };
+                hologramGroup.add(p);
+            }
+            hologramGroup.visible = false;
+
+            // Lights for particles
+            const light = new THREE.PointLight(0x44ff88, 0.5, 2);
+            scene.add(light);
+
+            // Resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            arRunning = true;
+            animateAR();
+        }
+
+        function animateAR() {
+            if (!arRunning) return;
+            animationId = requestAnimationFrame(animateAR);
+
+            const t = performance.now() / 1000;
+            if (shaderMaterial) {
+                shaderMaterial.uniforms.uTime.value = t;
+                if (videoTexture) videoTexture.needsUpdate = true;
+            }
+
+            // Particles
+            if (hologramGroup && hologramGroup.visible) {
+                hologramGroup.children.forEach(p => {
+                    if (p.isMesh) {
+                        const a = t * p.userData.speed + p.userData.angle;
+                        p.position.set(
+                            Math.cos(a) * p.userData.radius,
+                            Math.sin(a * 2) * 0.04,
+                            Math.sin(a) * p.userData.radius
+                        );
+                    }
+                });
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // =============================================================
+        // AR — MINDAR
+        // =============================================================
+        let mindar = null;
+
+        async function startAR() {
+            if (mindar) {
+                try { await mindar.start(); } catch (_) {}
+                return;
+            }
+
+            try {
+                const MindAR = window.MindAR;
+                if (!MindAR) {
+                    console.error('MindAR not loaded');
+                    return;
+                }
+
+                mindar = new MindAR.Image({
+                    container: arView,
+                    imageTargetSrc: './targets.mind',
+                    maxTrack: 1,
+                });
+
+                // Start the AR controller
+                arController = await mindar.start();
+
+                // Set up camera for THREE.js
+                const video = arController.getVideoElement();
+                if (video) {
+                    // Use the same video element for both MindAR and THREE.js texture
+                    const vid = video;
+                    // We need to use the video from MindAR for the texture
+                    // But MindAR creates its own video element
+                    // We'll use it directly
+                    videoEl.srcObject = vid.srcObject;
+                    // Actually, MindAR uses a hidden video element.
+                    // We'll use the video from MindAR's camera.
+
+                    // The MindAR video element is accessible via arController.video
+                    // But we need to set up our video element to use the same stream.
+                    // Let's use the MindAR video directly.
+
+                    // Get the video element from MindAR
+                    const arVideo = arController.video;
+                    if (arVideo) {
+                        // Use this video for our texture
+                        videoEl.srcObject = arVideo.srcObject;
+                        videoEl.load();
+                        videoEl.play().catch(() => {});
+                    }
+                }
+
+                // Listen for target found
+                mindar.on('targetFound', (event) => {
+                    const targetIndex = event.target;
+                    console.log(`🎯 Маркер знайдено: index ${targetIndex}`);
+                    handleMarkerFound(targetIndex);
+                });
+
+                mindar.on('targetLost', () => {
+                    console.log('👋 Маркер втрачено');
+                    handleMarkerLost();
+                });
+
+                // Start the render loop for MindAR
+                arController.startRenderLoop(() => {
+                    // The render loop is handled by THREE.js
+                });
+
+                // Use the arController's video for our texture
+                const vid = arController.video;
+                if (vid) {
+                    // Wait for video to be ready
+                    if (vid.readyState >= 2) {
+                        videoTexture = new THREE.VideoTexture(vid);
+                        videoTexture.minFilter = THREE.LinearFilter;
+                        videoTexture.magFilter = THREE.LinearFilter;
+                        if (shaderMaterial) {
+                            shaderMaterial.uniforms.uTex.value = videoTexture;
+                        }
+                    } else {
+                        vid.addEventListener('loadedmetadata', () => {
+                            videoTexture = new THREE.VideoTexture(vid);
+                            videoTexture.minFilter = THREE.LinearFilter;
+                            videoTexture.magFilter = THREE.LinearFilter;
+                            if (shaderMaterial) {
+                                shaderMaterial.uniforms.uTex.value = videoTexture;
+                            }
+                        });
+                    }
+                }
+
+            } catch (err) {
+                console.error('MindAR start error:', err);
+            }
+        }
+
+        function pauseAR(forcePause) {
+            if (!mindar) return;
+            if (forcePause || !state.arPaused) {
+                try {
+                    mindar.pause();
+                    state.arPaused = true;
+                    arPauseBtn.textContent = '▶';
+                    arPauseBtn.classList.add('paused');
+                    if (videoEl) videoEl.pause();
+                    if (videoPlane) videoPlane.visible = false;
+                } catch (_) {}
+            } else {
+                try {
+                    mindar.resume();
+                    state.arPaused = false;
+                    arPauseBtn.textContent = '⏸';
+                    arPauseBtn.classList.remove('paused');
+                    if (videoEl) videoEl.play().catch(() => {});
+                } catch (_) {}
+            }
+        }
+
+        function resumeAR() {
+            if (state.arPaused && mindar) {
+                try {
+                    mindar.resume();
+                    state.arPaused = false;
+                    arPauseBtn.textContent = '⏸';
+                    arPauseBtn.classList.remove('paused');
+                } catch (_) {}
+            }
+        }
+
+        // =============================================================
+        // AR — MARKER HANDLING
+        // =============================================================
+        let currentMarkerIndex = null;
+        let videoPlayedForMarker = false;
+
+        function handleMarkerFound(index) {
+            if (index < 0 || index >= LOCATIONS.length) return;
+            if (state.completed[index]) {
+                // Already completed, just show a quick flash
+                showLetterReveal(index);
+                return;
+            }
+
+            currentMarkerIndex = index;
             state.currentLocation = index;
             const loc = LOCATIONS[index];
 
-            // Show AR screen
-            showScreen('arView');
-
-            // Update UI
             arLocationName.textContent = loc.icon + ' ' + loc.name;
-            arHint.querySelector('.label').innerHTML = '<span class="emoji">📸</span> Наведи камеру на маркер ' + loc.icon;
+            arHint.style.display = 'none';
 
-            // Reset quiz & letter
-            arQuiz.classList.remove('show');
-            arLetterReveal.classList.remove('show');
-            arQuiz.style.display = 'none';
-            arLetterReveal.style.display = 'none';
-            state.quizLocked = false;
-
-            // Set video source
-            const videoSrc = loc.video || './video1.mp4';
-            videoEl.src = videoSrc;
-            videoEl.load();
-            videoEl.pause();
-
-            // Set marker — we need to reload the scene with new marker
-            // Since MindAR doesn't support runtime marker change easily,
-            // we'll use the approach of setting the attribute and reloading.
-            // But simpler: we use a single marker for all locations.
-            // The marker is just a trigger; content is based on location index.
-
-            // Actually, we'll use the marker.mind file (single marker)
-            // and differentiate by location index.
-            // So we don't need to change the marker at runtime.
-
-            // Hide video entity initially
-            videoEntity.setAttribute('visible', false);
-
-            // Show hint
-            arHint.style.display = 'block';
-
-            // Reset video entity visibility
-            videoEntity.setAttribute('visible', false);
-
-            // We need to re-initialize the AR scene? No, we just use the same marker.
-            // The marker is the same for all locations.
-            // When the marker is found, we show the content for the current location.
-
-            // But we need to make sure the scene is ready.
-            // The scene should already be running.
-
-            // Re-enable the marker target
-            // The scene is already running with the marker.
-
-            // Show the hint
-            arHint.style.display = 'block';
-
-            // Make sure quiz is hidden
-            arQuiz.classList.remove('show');
-            arQuiz.style.display = 'none';
-
-            // Reset video
-            videoEntity.setAttribute('visible', false);
-
-            // The marker detection will trigger the content.
-            // We'll listen for targetFound event.
-
-            // If the scene is already ready, we might need to re-trigger.
-            // But we'll rely on the event listeners.
-        }
-
-        // =============================================================
-        // AR EVENT HANDLERS
-        // =============================================================
-        function setupAREvents() {
-            // Target found
-            arScene.addEventListener('targetFound', () => {
-                console.log('🎯 Маркер знайдено!');
-                arHint.style.display = 'none';
-                videoEntity.setAttribute('visible', true);
-
-                // Play video
-                videoEl.currentTime = 0;
-                videoEl.play().catch(e => console.warn('Autoplay failed', e));
-
-                // Show quiz after a delay (let the video play a bit)
-                setTimeout(() => {
-                    if (state.currentLocation !== null && !state.quizLocked) {
-                        showQuizForLocation(state.currentLocation);
+            // Show video plane
+            if (videoPlane) {
+                // Use the video from MindAR
+                const vid = arController ? arController.video : null;
+                if (vid && videoTexture) {
+                    // We already have the texture
+                    videoPlane.visible = true;
+                    // Set playing flag
+                    if (shaderMaterial) {
+                        shaderMaterial.uniforms.uPlaying.value = 1;
                     }
-                }, 3000);
-            });
-
-            // Target lost
-            arScene.addEventListener('targetLost', () => {
-                console.log('👋 Маркер втрачено');
-                videoEntity.setAttribute('visible', false);
-                videoEl.pause();
-                arQuiz.classList.remove('show');
-                arQuiz.style.display = 'none';
-                arHint.style.display = 'block';
-                state.quizLocked = false;
-            });
-
-            // Video ended
-            videoEl.addEventListener('ended', () => {
-                console.log('🎬 Відео завершено');
-                // If quiz isn't shown yet, show it now
-                if (state.currentLocation !== null && !state.quizLocked) {
-                    // Check if quiz is already showing
-                    if (!arQuiz.classList.contains('show')) {
-                        showQuizForLocation(state.currentLocation);
+                    // Try to play
+                    vid.play().catch(() => {});
+                } else {
+                    // Fallback: use our video element
+                    videoEl.src = loc.video;
+                    videoEl.load();
+                    videoEl.play().catch(() => {});
+                    if (videoPlane) videoPlane.visible = true;
+                    if (shaderMaterial) {
+                        shaderMaterial.uniforms.uPlaying.value = 1;
                     }
                 }
-            });
+            }
 
-            // Scene ready
-            arScene.addEventListener('renderstart', () => {
-                console.log('🚀 AR сцена готова');
-                state.sceneReady = true;
-            });
+            // Show quiz after video plays a bit
+            state.quizLocked = false;
+            setTimeout(() => {
+                if (state.currentLocation === index && !state.completed[index] && !state.quizLocked) {
+                    showQuiz(index);
+                }
+            }, 2500);
+
+            // Particles
+            if (hologramGroup) hologramGroup.visible = true;
+            state.markerFound = true;
+        }
+
+        function handleMarkerLost() {
+            if (videoPlane) videoPlane.visible = false;
+            if (hologramGroup) hologramGroup.visible = false;
+            if (shaderMaterial) {
+                shaderMaterial.uniforms.uPlaying.value = 0;
+            }
+            state.markerFound = false;
+            state.quizLocked = false;
+            arQuiz.classList.remove('show');
+            arQuiz.style.display = 'none';
+            arHint.style.display = 'block';
+            if (videoEl) videoEl.pause();
+            state.currentLocation = null;
         }
 
         // =============================================================
         // QUIZ
         // =============================================================
-        function showQuizForLocation(index) {
+        function showQuiz(index) {
+            if (state.completed[index]) return;
             if (state.quizLocked) return;
-            if (state.completed[index]) {
-                // Already completed, show letter again?
-                showLetterReveal(index);
-                return;
-            }
-
             const loc = LOCATIONS[index];
+
             qGhost.textContent = loc.ghost || '👻';
             qText.textContent = loc.question;
 
-            // Options
             qOptions.innerHTML = '';
             loc.options.forEach((opt, oi) => {
                 const btn = document.createElement('button');
@@ -1138,11 +1360,9 @@
             const loc = LOCATIONS[locIndex];
             const isCorrect = (selectedIndex === loc.correct);
 
-            // Disable all options
             const allOpts = qOptions.querySelectorAll('.opt');
             allOpts.forEach(o => o.classList.add('disabled'));
 
-            // Highlight correct/wrong
             allOpts.forEach((o, i) => {
                 if (i === loc.correct) o.classList.add('correct');
                 if (i === selectedIndex && !isCorrect) o.classList.add('wrong');
@@ -1151,31 +1371,26 @@
             state.quizLocked = true;
 
             if (isCorrect) {
-                // ✅ Correct!
                 setTimeout(() => {
-                    // Hide quiz
                     arQuiz.classList.remove('show');
                     arQuiz.style.display = 'none';
-
-                    // Mark as completed
                     state.completed[locIndex] = true;
                     state.letters[locIndex] = loc.letter;
-
-                    // Show letter reveal
                     showLetterReveal(locIndex);
-
-                    // Update dashboard
                     renderDashboard();
-                }, 800);
+                    state.quizLocked = false;
+                    // Hide video after a moment
+                    setTimeout(() => {
+                        if (videoPlane) videoPlane.visible = false;
+                        if (shaderMaterial) shaderMaterial.uniforms.uPlaying.value = 0;
+                    }, 2000);
+                }, 700);
             } else {
-                // ❌ Wrong — allow retry after a moment
                 setTimeout(() => {
-                    // Re-enable options
                     allOpts.forEach(o => {
                         o.classList.remove('correct', 'wrong', 'disabled');
                     });
                     state.quizLocked = false;
-                    // Keep quiz visible
                 }, 1200);
             }
         }
@@ -1185,18 +1400,68 @@
             revealLetter.textContent = loc.letter;
             arLetterReveal.style.display = 'flex';
             arLetterReveal.classList.add('show');
-
-            // Auto-hide after 3s
             setTimeout(() => {
                 arLetterReveal.classList.remove('show');
                 arLetterReveal.style.display = 'none';
-            }, 3000);
+            }, 2800);
+        }
+
+        // =============================================================
+        // OPEN LOCATION
+        // =============================================================
+        let arInitialized = false;
+
+        async function openLocation(index) {
+            // If already in AR view, just update
+            if (arView.classList.contains('active')) {
+                // If marker is already found, we need to reset
+                handleMarkerLost();
+                // Wait a bit then show hint
+                setTimeout(() => {
+                    arHint.style.display = 'block';
+                    arLocationName.textContent = LOCATIONS[index].icon + ' ' + LOCATIONS[index].name;
+                }, 100);
+                return;
+            }
+
+            showScreen('arView');
+            arLocationName.textContent = LOCATIONS[index].icon + ' ' + LOCATIONS[index].name;
+            arHint.style.display = 'block';
+            arQuiz.classList.remove('show');
+            arQuiz.style.display = 'none';
+            arLetterReveal.classList.remove('show');
+            arLetterReveal.style.display = 'none';
+            state.quizLocked = false;
+            state.currentLocation = index;
+
+            // Initialize AR if not done
+            if (!arInitialized) {
+                initARScene();
+                arInitialized = true;
+                // Start MindAR
+                await startAR();
+            } else {
+                // Resume if paused
+                if (state.arPaused) {
+                    resumeAR();
+                }
+                // Reset state
+                if (videoPlane) videoPlane.visible = false;
+                if (shaderMaterial) shaderMaterial.uniforms.uPlaying.value = 0;
+                state.markerFound = false;
+            }
+
+            // The marker detection will trigger the content
         }
 
         // =============================================================
         // DECODER
         // =============================================================
         function openDecoder() {
+            // Pause AR
+            if (arRunning && state.arPaused === false) {
+                pauseAR(true);
+            }
             showScreen('decoder');
             decoderInput.value = '';
             decoderResult.innerHTML = '<span style="color:#8896b8;">Введи 6 літер</span>';
@@ -1214,10 +1479,18 @@
                 return;
             }
 
+            // Check if all letters are collected
+            const allCollected = state.completed.every(v => v === true);
+            if (!allCollected) {
+                resultEl.className = 'decoder-result fail';
+                resultEl.innerHTML = '🔒 Збери всі 6 літер спочатку!';
+                return;
+            }
+
             if (input === TARGET_WORD) {
                 resultEl.className = 'decoder-result success';
-                resultEl.innerHTML = '🎉 <span class="big">ЗНАННЯ</span> 🎉<br>Ти зібрав усі літери! Ти — справжній шкільний герой! 🏆';
-                // Play a little celebration
+                resultEl.innerHTML =
+                '🎉 <span class="big">ЗНАННЯ</span> 🎉<br>Ти зібрав усі літери! Ти — справжній шкільний герой! 🏆';
             } else {
                 resultEl.className = 'decoder-result fail';
                 resultEl.innerHTML = '❌ Слово не збігається. Спробуй ще раз!';
@@ -1225,93 +1498,110 @@
         }
 
         // =============================================================
-        // NAVIGATION
+        // RESET
         // =============================================================
-        function goToDashboard() {
-            // Clean up AR
-            videoEntity.setAttribute('visible', false);
-            videoEl.pause();
-            arQuiz.classList.remove('show');
-            arQuiz.style.display = 'none';
-            arLetterReveal.classList.remove('show');
-            arLetterReveal.style.display = 'none';
-            arHint.style.display = 'block';
-            state.quizLocked = false;
-            state.currentLocation = null;
-
-            showScreen('dashboard');
-            renderDashboard();
-        }
-
         function resetGame() {
             if (!confirm('Справді хочеш почати заново? Усі літери будуть скинуті.')) return;
             state.completed = new Array(6).fill(false);
             state.letters = new Array(6).fill('');
+            localStorage.removeItem(STORAGE_KEY);
             renderDashboard();
-            // Also reset AR state
+            // Reset AR state
             arQuiz.classList.remove('show');
             arQuiz.style.display = 'none';
             arLetterReveal.classList.remove('show');
             arLetterReveal.style.display = 'none';
             state.quizLocked = false;
+            if (videoPlane) videoPlane.visible = false;
+            if (shaderMaterial) shaderMaterial.uniforms.uPlaying.value = 0;
+            if (hologramGroup) hologramGroup.visible = false;
+            state.markerFound = false;
         }
+
+        // =============================================================
+        // VISIBILITY CHANGE (alarm, break)
+        // =============================================================
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // App minimized - save and pause
+                saveGameState();
+                if (arView.classList.contains('active') && arRunning) {
+                    pauseAR(true);
+                }
+            } else {
+                // App restored
+                renderDashboard();
+                if (arView.classList.contains('active') && state.arPaused) {
+                    // Don't auto-resume, let user press play
+                    arPauseBtn.textContent = '▶';
+                    arPauseBtn.classList.add('paused');
+                }
+            }
+        });
+
+        // =============================================================
+        // EVENT BINDING
+        // =============================================================
+        decoderBtn.addEventListener('click', openDecoder);
+        resetBtn.addEventListener('click', resetGame);
+        arBackBtn.addEventListener('click', goToDashboard);
+        decoderBackBtn.addEventListener('click', goToDashboard);
+
+        arPauseBtn.addEventListener('click', () => {
+            if (arRunning) {
+                pauseAR();
+            }
+        });
+
+        decoderCheckBtn.addEventListener('click', checkDecoderWord);
+        decoderInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') checkDecoderWord();
+            // Auto-uppercase
+            setTimeout(() => {
+                decoderInput.value = decoderInput.value.toUpperCase();
+            }, 10);
+        });
+
+        // Prevent zoom
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
 
         // =============================================================
         // INIT
         // =============================================================
         function init() {
+            // Load saved state
+            const loaded = loadGameState();
             renderDashboard();
 
-            // Event listeners
-            decoderBtn.addEventListener('click', openDecoder);
-            resetBtn.addEventListener('click', resetGame);
-            arBackBtn.addEventListener('click', goToDashboard);
-            decoderBackBtn.addEventListener('click', goToDashboard);
-            decoderCheckBtn.addEventListener('click', checkDecoderWord);
-            decoderInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') checkDecoderWord();
-            });
-
-            // AR events
-            setupAREvents();
-
-            // Handle visibility change — pause video when hidden
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) {
-                    videoEl.pause();
-                }
-            });
-
-            // Handle back button on Android
-            window.addEventListener('popstate', (e) => {
-                if (arView.classList.contains('active')) {
-                    goToDashboard();
-                } else if (decoder.classList.contains('active')) {
-                    goToDashboard();
-                }
-            });
-
-            // Push initial state
-            window.history.pushState({ screen: 'dashboard' }, '');
-
-            // Prevent zoom
-            document.addEventListener('gesturestart', (e) => e.preventDefault());
+            // Initialize AR scene but don't start camera until needed
+            // We'll init on first openLocation
 
             console.log('🕵️ Таємний агент готовий!');
-            console.log('🎯 Шість локацій:');
-            LOCATIONS.forEach((l, i) => console.log(`  ${i+1}. ${l.icon} ${l.name} → ${l.letter}`));
+            console.log('🎯 6 локацій з маркерами 01-06');
             console.log(`🔐 Секретне слово: ${TARGET_WORD}`);
+            console.log('💾 Прогрес зберігається автоматично');
+
+            // Preload videos
+            LOCATIONS.forEach(loc => {
+                const v = document.createElement('video');
+                v.src = loc.video;
+                v.preload = 'metadata';
+                v.muted = true;
+                v.load();
+            });
         }
 
-        // Run when DOM ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
+        // Run init
+        init();
 
-    })();
-</script>
+        // =============================================================
+        // EXPOSE for debugging
+        // =============================================================
+        window.__state = state;
+        window.__reset = resetGame;
+        window.__save = saveGameState;
 
+        console.log('✅ Готово!');
+    </script>
 </body>
 </html>
